@@ -19,12 +19,13 @@
           <div class="col-12 col-md-9 col-lg-7 col-xl-6">
             <div class="card" style="border-radius: 40px;width:30rem;">
               <div class="card-body p-5" style="width:30rem; border: 2px solid #7287fd; border-radius: 40px;">
-                <h2 class="text-uppercase text-center mb-5">Create an account</h2>
+                <h2 class="text-uppercase text-center mb-5">Login</h2>
 
                 <form action="#" method="POST">
-                  <div data-mdb-input-init class="form-outline mb-4"></div>
-                  <input type="text" name="username" class="form-control form-control-lg" placeholder="Username"
-                    required />
+                  <div data-mdb-input-init class="form-outline mb-4">
+                    <input type="text" name="username" class="form-control form-control-lg" placeholder="Username"
+                      required />
+                  </div>
                   <div data-mdb-input-init class="form-outline mb-4">
                     <input type="password" name="password" class="form-control form-control-lg" placeholder="Password"
                       required />
