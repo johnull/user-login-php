@@ -102,6 +102,56 @@ class User
     $stmt->close();
   }
 
+  public function createUser($username, $email, $password)
+  {
+    $query = "INSERT
+              INTO users(username, email, password)
+              VALUES (?, ?, ?)";
+
+    $stmt = $this->conn->prepare($query);
+
+    if (!$stmt)
+      die('MySQL prepare error:' . $this->conn->error);
+
+    $stmt->bind_param("sss", $username, $email, $password);
+
+    if ($stmt->execute()) {
+      if ($stmt->affected_rows > 0) {
+        $stmt->close();
+        return true;
+      } else {
+        $stmt->close();
+        return false;
+      }
+    } else {
+      die("MySQL execute error: " . $stmt->error);
+    }
+  }
+
+  public function deleteUser($email)
+  {
+    $query = "DELETE FROM users WHERE email = ?";
+
+    $stmt = $this->conn->prepare($query);
+
+    if (!$stmt)
+      die('MySQL prepare error:' . $this->conn->error);
+
+    $stmt->bind_param("s", $email);
+
+    if ($stmt->execute()) {
+      if ($stmt->affected_rows > 0) {
+        $stmt->close();
+        return true;
+      } else {
+        $stmt->close();
+        return false;
+      }
+    } else {
+      die("MySQL execute error: " . $stmt->error);
+    }
+  }
+
   public function getAllUsers($isAdmin)
   {
     if ($isAdmin) {
