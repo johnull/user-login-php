@@ -1,6 +1,25 @@
 <?php
+require_once('../includes/db.php');
+require_once('../src/auth.php');
 
+try {
+  $db = new DbConnection();
+  $conn = $db->connect();
+} catch (Exception $e) {
+  printf("Could not connect to MySQL.");
+}
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $auth = new Auth($conn);
+
+  $email = trim($_POST['email']);
+  $password = $_POST['password'];
+
+  $auth->setEmail($email);
+  $auth->setPassword(($password));
+
+  $auth->userLogin();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -23,7 +42,7 @@
 
                 <form action="#" method="POST">
                   <div data-mdb-input-init class="form-outline mb-4">
-                    <input type="text" name="username" class="form-control form-control-lg" placeholder="Username"
+                    <input type="text" name="email" class="form-control form-control-lg" placeholder="email"
                       required />
                   </div>
                   <div data-mdb-input-init class="form-outline mb-4">
@@ -32,9 +51,9 @@
                   </div>
 
                   <div class="d-flex justify-content-center">
-                    <button type="submit" name="register" data-mdb-button-init data-mdb-ripple-init
+                    <button type="submit" name="login" data-mdb-button-init data-mdb-ripple-init
                       class="btn btn-success btn-block btn-lg gradient-custom-4"
-                      style="width: 18rem; background-color: #1e66f5; text-color: #cecece">Sign In</button>
+                      style="width: 18rem; background-color: #1e66f5; color: #cecece">Sign In</button>
                   </div>
 
                   <p class="text-center text-muted mt-5 mb-0">Don't have an account yes? <a href="registration-form.php"

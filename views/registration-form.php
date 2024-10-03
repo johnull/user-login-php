@@ -1,9 +1,6 @@
 <?php
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-
-require_once('../includes/db.php');
+require_once("../includes/db.php");
+require_once("../src/user.php");
 
 try {
   $db = new DbConnection();
@@ -11,12 +8,6 @@ try {
 } catch (Exception $e) {
   printf("Error: %s", $e);
 }
-
-require_once("../includes/db.php");
-require_once("../src/user.php");
-
-$dbConnection = new DbConnection();
-$conn = $dbConnection->connect();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $user = new User($conn);
@@ -73,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   <div class="d-flex justify-content-center">
                     <button type="submit" name="register" data-mdb-button-init data-mdb-ripple-init
                       class="btn btn-success btn-block btn-lg gradient-custom-4"
-                      style="width: 18rem; background-color: #1e66f5; text-color: #cecece">Register</button>
+                      style="width: 18rem; background-color: #1e66f5; color: #cecece">Register</button>
                   </div>
 
                   <p class="text-center text-muted mt-5 mb-0">Have already an account? <a href="login-form.php"

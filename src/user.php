@@ -4,7 +4,6 @@ class User
   private $conn;
   private $table_name = "users";
 
-  private $id;
   private $username;
   private $email;
   private $password;
@@ -13,31 +12,26 @@ class User
   public function __construct($db)
   {
     $this->conn = $db;
-
   }
 
   public function setUsername($username)
   {
     $this->username = trim($username);
-
   }
 
   public function setEmail($email)
   {
     $this->email = trim($email);
-
   }
 
   public function setPassword($password)
   {
     $this->password = trim($password);
-
   }
 
   public function setConfirmPassword($cpass)
   {
     $this->cpass = trim($cpass);
-
   }
 
   public function userCreate()
@@ -91,8 +85,8 @@ class User
     $hashedPassword = password_hash($this->password, PASSWORD_DEFAULT);
 
     $query = "INSERT 
-                INTO users(username, email, password)
-                VALUES (?, ?, ?)";
+              INTO users(username, email, password)
+              VALUES (?, ?, ?)";
 
     $stmt = $this->conn->prepare($query);
     $stmt->bind_param("sss", $this->username, $this->email, $hashedPassword);
@@ -106,5 +100,26 @@ class User
     }
 
     $stmt->close();
+  }
+
+  public function getAllUsers($isAdmin)
+  {
+    if ($isAdmin) {
+      $query = "SELECT * FROM users";
+      $stmt = $this->conn->prepare($query);
+      $stmt->execute();
+
+      $result = $stmt->get_result();
+
+      $users = [];
+
+      while ($row = $result->fetch_assoc()) {
+        $users[] = $row;
+      }
+
+      return $users;
+    }
+
+    return [];
   }
 }
