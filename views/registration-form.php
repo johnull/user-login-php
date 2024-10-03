@@ -11,7 +11,7 @@ try {
 }
 
 require_once("../includes/db.php");
-require_once("../includes/user.php");
+require_once("../src/user.php");
 
 $dbConnection = new DbConnection();
 $conn = $dbConnection->connect();
