@@ -17,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $user->setPassword($_POST['password']);
   $user->setConfirmPassword($_POST['cpass']);
 
-  $user->userCreate();
 }
 
 ?>
@@ -36,9 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <div class="container h-100">
         <div class="row d-flex justify-content-center align-items-center h-100">
           <div class="col-12 col-md-9 col-lg-7 col-xl-6">
-            <div class="card" style="border-radius: 40px;width:30rem;">
+            <div class="card" style="border: 0px; display:grid; justify-content: center; align-item: center">
               <div class="card-body p-5" style="width:30rem; border: 2px solid #7287fd; border-radius: 40px;">
+                <?= $user->userCreate(); ?>
                 <h2 class="text-uppercase text-center mb-5">Create an account</h2>
+
 
                 <form action="#" method="POST">
                   <div data-mdb-input-init class="form-outline mb-4">

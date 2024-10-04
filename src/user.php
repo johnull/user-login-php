@@ -38,25 +38,45 @@ class User
   {
 
     if (empty($this->username) || empty($this->email) || empty($this->password) || empty($this->cpass)) {
-      printf("<p>All fields are required.</p>");
+      printf('
+        <div class="container-error" style="display:flex; justify-content: center;">
+          <div class="alert alert-danger" role="alert" style="width: auto">
+            All fields are required.
+          </div>
+        </div>');
       return null;
     }
 
     // validationg email format
     if (!filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
-      printf("<p>Invalid email format</p>");
+      printf('
+        <div class="container-error" style="display:flex; justify-content: center;">
+          <div class="alert alert-danger" role="alert" style="width: auto">
+            Invalid email format.
+          </div>
+        </div>');
       return null;
     }
 
     // validationg pass
 
     if (strlen($this->password) < 8 || !preg_match('/[A-Za-z]/', $this->password) || !preg_match('/[0-9]/', $this->password)) {
-      printf("<p>Password must be at least 8 characters long and contain both letters and numbers.</p>");
+      printf('
+        <div class="container-error" style="display:flex; justify-content: center;">
+          <div class="alert alert-danger" role="alert" style="width: auto">
+            Password must be at least 8 characters long and contain both letters and numbers.
+          </div>
+        </div>');
       return null;
     }
 
     if ($this->password !== $this->cpass) {
-      printf("<p>Passwords do not match.</p>");
+      printf('
+        <div class="container-error" style="display:flex; justify-content: center;">
+          <div class="alert alert-danger" role="alert" style="width: auto">
+            Passwords do not match.
+          </div>
+        </div>');
       return null;
     }
 
@@ -68,7 +88,12 @@ class User
     $stmt = $this->conn->prepare($query);
 
     if (!$stmt) {
-      printf("<p>Ops... Something went wrong</p>");
+      printf('
+        <div class="container-error" style="display:flex; justify-content: center;">
+          <div class="alert alert-danger" role="alert" style="width: auto">
+            Ops... Something went wrong
+          </div>
+        </div>');
       return null;
     }
 
@@ -77,9 +102,16 @@ class User
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-      printf("<p style='color: red'>Unable to register. Try again.");
+      printf('
+        <div class="container-error" style="display:flex; justify-content: center;">
+          <div class="alert alert-danger" role="alert">
+            Unable to register. Try again.
+          </div>
+        </div>');
       return null;
     }
+
+    // ----------------------
 
     // create new user with hashed pass
     $hashedPassword = password_hash($this->password, PASSWORD_DEFAULT);
@@ -104,22 +136,85 @@ class User
 
   public function adminCreateUser()
   {
+    if (!filter_var($this->email, FILTER_VALIDATE_EMAIL)) {
+      printf('
+        <div class="container-error" style="display:flex; justify-content: center;">
+          <div class="alert alert-danger" role="alert" style="width: auto">
+            Invalid email format.
+          </div>
+        </div>');
+
+      return null;
+    }
+
+    if (strlen($this->password) < 8 || !preg_match('/[A-Za-z]/', $this->password) || !preg_match('/[0-9]/', $this->password)) {
+      printf('
+        <div class="container-error" style="display:flex; justify-content: center;">
+          <div class="alert alert-danger" role="alert" style="width: auto">
+            Password must be at least 8 characters long and contain both letters and numbers.
+          </div>
+        </div>');
+
+      return null;
+    }
+
+    if ($this->password !== $this->cpass) {
+      printf('
+        <div class="container-error" style="display:flex; justify-content: center;">
+          <div class="alert alert-danger" role="alert" style="width: auto">
+            Password does not match!
+          </div>
+        </div>');
+
+      return null;
+    }
+
+    $query = "SELECT *
+    FROM $this->table_name
+    WHERE email = ?";
+
+    $stmt = $this->conn->prepare($query);
+
+    if (!$stmt) {
+      printf('
+        <div class="container-error" style="display:flex; justify-content: center;">
+          <div class="alert alert-danger" role="alert" style="width: auto">
+            Ops... Something went wrong
+          </div>
+        </div>');
+      return null;
+    }
+
+    $stmt->bind_param("s", $this->email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+      printf('
+        <div class="container-error" style="display:flex; justify-content: center;">
+          <div class="alert alert-danger" role="alert" style="width: auto">
+            Unable to register.
+          </div>
+        </div>');
+      return null;
+    }
+
+    $hashedPassword = password_hash($this->password, PASSWORD_DEFAULT);
+
     $query = "INSERT
               INTO users(username, email, password)
               VALUES (?, ?, ?)";
 
     $stmt = $this->conn->prepare($query);
+    $stmt->bind_param("sss", $this->username, $this->email, $hashedPassword);
 
     if (!$stmt)
       die('MySQL prepare error:' . $this->conn->error);
 
-    $hashedPassword = password_hash($this->password, PASSWORD_DEFAULT);
-
-    $stmt->bind_param("sss", $this->username, $this->email, $hashedPassword);
-
     if ($stmt->execute()) {
       if ($stmt->affected_rows > 0) {
         $stmt->close();
+        header('location: dashboard.php');
         return true;
       } else {
         $stmt->close();
@@ -140,6 +235,7 @@ class User
 
     if ($stmt->execute()) {
       if ($stmt->affected_rows > 0) {
+        header('location: dashboard.php');
         $stmt->close();
         return true;
       } else {
@@ -149,28 +245,6 @@ class User
     } else {
       die("MySQL execute error: " . $stmt->error);
     }
-  }
-
-
-  public function getAllUsers($isAdmin)
-  {
-    if ($isAdmin) {
-      $query = "SELECT * FROM users";
-      $stmt = $this->conn->prepare($query);
-      $stmt->execute();
-
-      $result = $stmt->get_result();
-
-      $users = [];
-
-      while ($row = $result->fetch_assoc()) {
-        $users[] = $row;
-      }
-
-      return $users;
-    }
-
-    return [];
   }
 
   public function updateUser(int $id, $columnToChange, array $valueToChange)
@@ -229,5 +303,27 @@ class User
     } catch (Exception $e) {
       echo 'user not found';
     }
+
+  }
+
+  public function getAllUsers($isAdmin)
+  {
+    if ($isAdmin) {
+      $query = "SELECT * FROM users";
+      $stmt = $this->conn->prepare($query);
+      $stmt->execute();
+
+      $result = $stmt->get_result();
+
+      $users = [];
+
+      while ($row = $result->fetch_assoc()) {
+        $users[] = $row;
+      }
+
+      return $users;
+    }
+
+    return [];
   }
 }

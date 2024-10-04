@@ -1,6 +1,4 @@
-<?php ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
+<?php
 session_start();
 require_once('../src/user.php');
 require_once('../includes/db.php');
@@ -27,11 +25,7 @@ if (!isset($_SESSION['id'])) {
 }
 
 if (isset($_POST['deleteItem'])) {
-  if ($user->deleteUser($_POST['deleteItem'])) {
-    header('location: dashboard.php');
-    exit();
-  }
-  echo $notify;
+  $user->deleteUser($_POST['deleteItem']);
 }
 
 if (isset($_POST['createUser'])) {
@@ -43,10 +37,7 @@ if (isset($_POST['createUser'])) {
   $user->setConfirmPassword($_POST['cpass']);
 
   $user->adminCreateUser();
-  header('location: dashboard.php');
-  exit();
 }
-
 
 if (isset($_POST['updateUser']) && !empty($_POST['id'])) {
   $id = (int) $_POST['id'];
@@ -63,7 +54,12 @@ if (isset($_POST['updateUser']) && !empty($_POST['id'])) {
     }
   }
   if ($userNotFound) {
-    echo '';
+    printf('
+        <div class="container-error" style="display:flex; justify-content: center;">
+          <div class="alert alert-danger" role="alert" style="width: auto">
+            User not found.
+          </div>
+        </div>');
   }
 }
 
@@ -75,18 +71,13 @@ if (isset($_POST['updateUser']) && !empty($_POST['id'])) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.2.1/dist/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <link rel="stylesheet" href="../assets/style.css">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.6/dist/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.2.1/dist/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../assets/style.css">
 
   <title>Dashboard</title>
 </head>
@@ -100,7 +91,7 @@ if (isset($_POST['updateUser']) && !empty($_POST['id'])) {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form action="#" method="POST">
+        <form action="" method="POST">
           <div data-mdb-input-init class="form-outline mb-4">
             <input type="text" name="username" class="form-control form-control-lg" placeholder="Username" required />
           </div>
@@ -121,7 +112,7 @@ if (isset($_POST['updateUser']) && !empty($_POST['id'])) {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary" name="createUser">Register</button>
+        <button type="submit" id="diabo" class="btn btn-primary" name="createUser">Register</button>
       </div>
       </form>
     </div>
@@ -157,7 +148,7 @@ if (isset($_POST['updateUser']) && !empty($_POST['id'])) {
 
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary" id="btnUpdate" name="updateUser">Update</button>
+            <button type="submit" class="btn btn-primary" id="btn-update-form" name="updateUser">Update</button>
           </div>
         </form>
       </div>
@@ -165,42 +156,8 @@ if (isset($_POST['updateUser']) && !empty($_POST['id'])) {
   </div>
 </div>
 
-<!--Toast-->
-<div class="toast-container toast-container top-0 end-0 p-2">
-  <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="toast-header">
-      <strong class="me-auto">Alert</strong>
-      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-    <div class="toast-body">
-      User deleted!
-    </div>
-  </div>
-</div>
-
-<script>
-  $(document).ready(function() {
-    $('#registerModal').on('shown.bs.modal', function() {
-      $(this).focus();
-    });
-
-    $('[data-bs-toggle="modal"]').on('shown.bs.modal', function() {
-      $(this).focus();
-    });
-  });
-
-  const toastTrigger = document.getElementById("btnDelete");
-  const toastLiveExample = document.getElementById("liveToast");
-
-  if (toastTrigger) {
-    const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample);
-    toastTrigger.addEventListener("click", () => {
-      toastBootstrap.show();
-    });
-  }
-</script>
-
 <body>
+
   <div class="container" style="display:flex; justify-content: center; padding: 15px 0px 20px 0px">
     <a style="color:blue;font-weight:bold; display: flex; justify-content:center" href="./logout.php">LOGOUT</a>
   </div>
@@ -209,12 +166,15 @@ if (isset($_POST['updateUser']) && !empty($_POST['id'])) {
       style="margin-right: 10px">
       Create User
     </button>
-    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#updateModal">Update
+    <button type="button" id="btnUpdate" class="btn btn-outline-primary" data-bs-toggle="modal"
+      data-bs-target="#updateModal">Update
       User
     </button>
+    <hr>
+    <br>
   </div>
 
-  <form action="#" method="POST">
+  <form action="" method="POST">
     <table class="table">
       <thead>
         <tr>
@@ -230,7 +190,7 @@ if (isset($_POST['updateUser']) && !empty($_POST['id'])) {
         <?php
         if ($users) {
           foreach ($users as $row) {
-        ?>
+            ?>
             <tr>
               <th scope="row"><?php echo $row['id'] ?></th>
               <td><?php echo $row['username'] ?></td>
@@ -238,19 +198,29 @@ if (isset($_POST['updateUser']) && !empty($_POST['id'])) {
               <td><?php echo $row['admin'] == 1 ? '<div class="rainbow rainbow_text_animated">-^_^-' : 'No' ?></td>
               <td><?php echo $row['password'] ?></td>
               <td><?php echo $row['created_at'] ?></td>
-              <?php echo $row['admin'] == 1 ? '' : '<td><button class="btn btn-outline-danger" id="btnDelete" type="submit" name="deleteItem" value="' . $row['email'] . '" />Delete</button></td>'; ?>
+              <?php echo $row['admin'] == 1 ? '' : '<td><button class="btn btn-outline-danger" id="diabo" type="submit" name="deleteItem" value="' . $row['email'] . '" >Delete</button></td>'; ?>
             </tr>
 
-        <?php }
+          <?php }
         } else {
           echo "<tr><td colspan='5'>No users found.</td></tr>";
         }
         ?>
       </tbody>
     </table>
-
   </form>
 
 </body>
+<script>
+  $(document).ready(function () {
+    $('#registerModal').on('shown.bs.modal', function () {
+      $(this).focus();
+    });
+
+    $('[data-bs-toggle="modal"]').on('shown.bs.modal', function () {
+      $(this).focus();
+    });
+  });
+</script>
 
 </html>
