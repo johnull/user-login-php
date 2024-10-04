@@ -13,5 +13,5 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`)
 );
 
-INSERT INTO users (id, admin, username, email, password) VALUES (1, 1, 'lainroot', 'lain@root.sel', '1773');
+INSERT INTO users (id, admin, username, email, password) VALUES (1, 1, 'lainroot', 'lain@root.sel', '1337');
 

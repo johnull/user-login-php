@@ -102,7 +102,7 @@ class User
     $stmt->close();
   }
 
-  public function createUser($username, $email, $password)
+  public function adminCreateUser()
   {
     $query = "INSERT
               INTO users(username, email, password)
@@ -113,7 +113,9 @@ class User
     if (!$stmt)
       die('MySQL prepare error:' . $this->conn->error);
 
-    $stmt->bind_param("sss", $username, $email, $password);
+    $hashedPassword = password_hash($this->password, PASSWORD_DEFAULT);
+
+    $stmt->bind_param("sss", $this->username, $this->email, $hashedPassword);
 
     if ($stmt->execute()) {
       if ($stmt->affected_rows > 0) {
@@ -134,9 +136,6 @@ class User
 
     $stmt = $this->conn->prepare($query);
 
-    if (!$stmt)
-      die('MySQL prepare error:' . $this->conn->error);
-
     $stmt->bind_param("s", $email);
 
     if ($stmt->execute()) {
@@ -150,6 +149,10 @@ class User
     } else {
       die("MySQL execute error: " . $stmt->error);
     }
+  }
+
+  public function updateUser($idEmail, $allowedParams)
+  {
   }
 
   public function getAllUsers($isAdmin)
