@@ -173,49 +173,61 @@ class User
     return [];
   }
 
-  public function updateUser(int $id, $email, $columnToChange, array $valueToChange)
+  public function updateUser(int $id, $columnToChange, array $valueToChange)
   {
     $query = "SELECT email
               FROM users
-              WHERE email = ?";
+              WHERE id = ?";
 
-
-    $stmt = $this->conn->prepare($query);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-
-    $res = $stmt->get_result();
-
-    $cols = array();
-    foreach ($valueToChange as $row) {
-      $cols[] = "$columnToChange = '$row'";
-    }
-
-    if ($res->num_rows > 0) {
-      foreach ($valueToChange as $value) {
-        $queryUpdate = "UPDATE users SET $columnToChange = ? WHERE id = ? ";
-        $stmt = $this->conn->prepare($queryUpdate);
-        $stmt->bind_param("si", $value, $id);
-        $stmt->execute();
-        $queryUpdate = "";
-        header('location: dashboard.php');
-      }
-    }
-  }
-
-  public function getEmailByID($id)
-  {
-    $query = "SELECT email FROM users WHERE id = ?";
     $stmt = $this->conn->prepare($query);
     $stmt->bind_param("i", $id);
     $stmt->execute();
 
     $res = $stmt->get_result();
 
-    $row = $res->fetch_assoc();
+    $cols = array();
 
-    $email = $row['email'];
+    if ($res->num_rows > 0) {
+      $queryUpdate = "UPDATE users SET $columnToChange = ? WHERE id = ? ";
+      $stmt = $this->conn->prepare($queryUpdate);
 
-    return $email;
+      foreach ($valueToChange as $row) {
+        $cols[] = "$columnToChange = '$row'";
+      }
+
+      foreach ($valueToChange as $value) {
+        $stmt->bind_param("si", $value, $id);
+        $stmt->execute();
+        $queryUpdate = "";
+        header('location: dashboard.php');
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  public function getEmailByID($id)
+  {
+    try {
+      $query = "SELECT email FROM users WHERE id = ?";
+      $stmt = $this->conn->prepare($query);
+      $stmt->bind_param("i", $id);
+      $stmt->execute();
+
+      $res = $stmt->get_result();
+
+      if ($res->num_rows > 0) {
+        $row = $res->fetch_assoc();
+
+        $email = $row['email'];
+
+        return $email;
+      } else {
+        echo '';
+      }
+    } catch (Exception $e) {
+      echo 'user not found';
+    }
   }
 }
