@@ -151,9 +151,6 @@ class User
     }
   }
 
-  public function updateUser($idEmail, $allowedParams)
-  {
-  }
 
   public function getAllUsers($isAdmin)
   {
@@ -174,5 +171,51 @@ class User
     }
 
     return [];
+  }
+
+  public function updateUser(int $id, $email, $columnToChange, array $valueToChange)
+  {
+    $query = "SELECT email
+              FROM users
+              WHERE email = ?";
+
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+
+    $res = $stmt->get_result();
+
+    $cols = array();
+    foreach ($valueToChange as $row) {
+      $cols[] = "$columnToChange = '$row'";
+    }
+
+    if ($res->num_rows > 0) {
+      foreach ($valueToChange as $value) {
+        $queryUpdate = "UPDATE users SET $columnToChange = ? WHERE id = ? ";
+        $stmt = $this->conn->prepare($queryUpdate);
+        $stmt->bind_param("si", $value, $id);
+        $stmt->execute();
+        $queryUpdate = "";
+        header('location: dashboard.php');
+      }
+    }
+  }
+
+  public function getEmailByID($id)
+  {
+    $query = "SELECT email FROM users WHERE id = ?";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+
+    $res = $stmt->get_result();
+
+    $row = $res->fetch_assoc();
+
+    $email = $row['email'];
+
+    return $email;
   }
 }

@@ -10,38 +10,6 @@ try {
   $conn = $db->connect();
   $user = new User($conn);
 
-
-  if (!isset($_SESSION['id'])) {
-    header('location: login-form.php');
-    exit();
-  }
-
-  if (isset($_POST['deleteItem'])) {
-    if ($user->deleteUser($_POST['deleteItem'])) {
-      header('location: dashboard.php');
-      exit();
-    }
-    echo $notify;
-  }
-
-  if (isset($_POST['createUser'])) {
-    $user = new User($conn);
-
-    $user->setUsername($_POST['username']);
-    $user->setEmail($_POST['email']);
-    $user->setPassword($_POST['password']);
-    $user->setConfirmPassword($_POST['cpass']);
-
-    $user->adminCreateUser();
-    header('location: dashboard.php');
-    exit();
-  }
-
-
-  if (isset($_POST['updateUser'])) {
-    // $user->updateUser($_POST['updateUser']);
-  }
-
   if ($_SESSION['admin'] === 1) {
     $users = $user->getAllUsers(isAdmin: true);
   } else {
@@ -52,6 +20,50 @@ try {
 } catch (Exception $e) {
   echo "Opss... Something went wrong.";
 }
+
+if (!isset($_SESSION['id'])) {
+  header('location: login-form.php');
+  exit();
+}
+
+if (isset($_POST['deleteItem'])) {
+  if ($user->deleteUser($_POST['deleteItem'])) {
+    header('location: dashboard.php');
+    exit();
+  }
+  echo $notify;
+}
+
+if (isset($_POST['createUser'])) {
+  $user = new User($conn);
+
+  $user->setUsername($_POST['username']);
+  $user->setEmail($_POST['email']);
+  $user->setPassword($_POST['password']);
+  $user->setConfirmPassword($_POST['cpass']);
+
+  $user->adminCreateUser();
+  header('location: dashboard.php');
+  exit();
+}
+
+
+if (isset($_POST['updateUser']) && !empty($_POST['id'])) {
+  $email = $user->getEmailByID($_POST['id']);
+  $whitelist = [
+    'username',
+    'email'
+  ];
+
+  foreach ($_POST as $key => $valueToChange) {
+    foreach ($whitelist as $columnToChange) {
+      if ($key === $columnToChange && !empty($valueToChange)) {
+        $user->updateUser($_POST['id'], $email, $columnToChange, array($valueToChange));
+      }
+    }
+  }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -118,17 +130,17 @@ try {
           <div><strong>Fill in only the fields you want to update.</strong></div>
           <br>
           <div data-mdb-input-init class="form-outline mb-4">
-            What is the user's email?
-            <input type="email" name="id-email" class="form-control form-control-lg" placeholder="Email" />
+            Current user ID
+            <input type="text" name="id" class="form-control form-control-lg" placeholder="id" required />
           </div>
           <hr>
-          Data to update
-          <br>
           <div data-mdb-input-init class="form-outline mb-4">
+            <label for="username">New username</label>
             <input type="text" name="username" class="form-control form-control-lg" placeholder="Username" />
           </div>
 
           <div data-mdb-input-init class="form-outline mb-4">
+            <label for="email">New email</label>
             <input type="email" name="email" class="form-control form-control-lg" placeholder="Email" />
           </div>
 
@@ -143,13 +155,12 @@ try {
 </div>
 
 <script>
-
-  $(document).ready(function () {
-    $('#registerModal').on('shown.bs.modal', function () {
+  $(document).ready(function() {
+    $('#registerModal').on('shown.bs.modal', function() {
       $(this).focus();
     });
 
-    $('[data-bs-toggle="modal"]').on('shown.bs.modal', function () {
+    $('[data-bs-toggle="modal"]').on('shown.bs.modal', function() {
       $(this).focus();
     });
 
@@ -186,7 +197,7 @@ try {
         <?php
         if ($users) {
           foreach ($users as $row) {
-            ?>
+        ?>
             <tr>
               <th scope="row"><?php echo $row['id'] ?></th>
               <td><?php echo $row['username'] ?></td>
@@ -197,7 +208,7 @@ try {
               <?php echo $row['admin'] == 1 ? '' : '<td><button class="btn btn-outline-danger" type="submit" name="deleteItem" value="' . $row['email'] . '" />Delete</button></td>'; ?>
             </tr>
 
-          <?php }
+        <?php }
         } else {
           echo "<tr><td colspan='5'>No users found.</td></tr>";
         }
